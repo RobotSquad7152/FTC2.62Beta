@@ -1,6 +1,3 @@
-/* testing git */
-/* testing */
-
 package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Bitmap;
