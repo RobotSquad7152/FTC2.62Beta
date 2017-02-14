@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "C:\\RobotSquad\\ftc_app-beta2.62\\ftc_app-beta\\TeamCode\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi-v4\\button_shape.xml",
+        "source": "C:\\RobotSquad\\ftc_app-beta2.62\\ftc_app-beta\\TeamCode\\build\\intermediates\\exploded-aar\\FtcCommon-release\\res\\drawable-hdpi-v4\\button_shape.xml"
+    },
+    {
+        "merged": "C:\\RobotSquad\\ftc_app-beta2.62\\ftc_app-beta\\TeamCode\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi-v4\\ic_launcher.png",
+        "source": "C:\\RobotSquad\\ftc_app-beta2.62\\ftc_app-beta\\TeamCode\\build\\intermediates\\exploded-aar\\ftc_app-beta\\FtcRobotController\\unspecified\\res\\drawable-hdpi-v4\\ic_launcher.png"
+    }
+]

@@ -1,0 +1,28 @@
+[
+    {
+        "outputFile": "C:\\RobotSquad\\ftc_app-beta2.62\\ftc_app-beta\\TeamCode\\build\\intermediates\\res\\merged\\debug\\values-v11\\values-v11.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endLine": 4,
+                    "endColumn": 12,
+                    "endOffset": 187
+                },
+                "from": {
+                    "file": "C:\\RobotSquad\\ftc_app-beta2.62\\ftc_app-beta\\TeamCode\\build\\intermediates\\exploded-aar\\ftc_app-beta\\FtcRobotController\\unspecified\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 2,
+                        "startColumn": 4,
+                        "startOffset": 55,
+                        "endLine": 4,
+                        "endColumn": 12,
+                        "endOffset": 187
+                    }
+                }
+            }
+        ]
+    }
+]
