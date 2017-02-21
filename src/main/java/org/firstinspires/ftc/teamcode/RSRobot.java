@@ -476,11 +476,17 @@ public class RSRobot
         //      Log.d("@@@@@@@ResetBackRight: ", "xxx");
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //       Log.d("@@@@@@@@ResetBackLeft: ", "xxx");
-
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //      Log.d("@@@@@@@ResetBackRight: ", "xxx");
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //       Log.d("@@@@@@@@ResetBackLeft: ", "xxx");
         //This failed on the 2nd run
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //    Log.d("@Rnwithoutencod right: ", "xxx");
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //    Log.d("@Rnwithoutencod right: ", "xxx");
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //    Log.d("@RUN_WITHOUT_ENCODERS: ", "xxx");
 
@@ -493,6 +499,8 @@ public class RSRobot
 
         while (abs(motorBackLeft.getCurrentPosition()) < encoderTarget &&
                 abs(motorBackRight.getCurrentPosition()) < encoderTarget &&
+                abs(motorFrontLeft.getCurrentPosition()) < encoderTarget &&
+                abs(motorFrontRight.getCurrentPosition()) < encoderTarget &&
                 !IsRobotStalled(isLeftMotorStalled, isRightMotorStalled) && opMode.opModeIsActive() && !opMode.isStopRequested())
         {
             Log.d("@@@@@@@@BackLeft : ", "" + motorBackLeft.getCurrentPosition());
@@ -632,8 +640,10 @@ public class RSRobot
         double currentHeading = 0;
         double leftCalculatedPow = 0;
         double rightCalculatedPow = 0;
-        double previousLeftEncoder = 0;
-        double previousRightEncoder = 0;
+        double previousBackLeftEncoder = 0;
+        double previousBackRightEncoder = 0;
+        double previousFrontLeftEncoder = 0;
+        double previousFrontRightEncoder = 0;
         double previousHeading = 0;
         int leftStallPos = 0;
         int rightStallPos = 0;
@@ -660,12 +670,17 @@ public class RSRobot
         //      Log.d("@@@@@@@ResetBackRight: ", "xxx");
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //       Log.d("@@@@@@@@ResetBackLeft: ", "xxx");
-
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //      Log.d("@@@@@@@ResetBackRight: ", "xxx");
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //       Log.d("@@@@@@@@ResetBackLeft: ", "xxx");
         //This failed on the 2nd run
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //    Log.d("@Rnwithoutencod right: ", "xxx");
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //    Log.d("@Rnwithoutencod right: ", "xxx");
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //    Log.d("@RUN_WITHOUT_ENCODERS: ", "xxx");
         //
         // set current heading to zero
@@ -687,14 +702,16 @@ public class RSRobot
             }
 
             //continue driving while encoders have not reached target position, the current heading has not reached target heading, and while the robot is not stalled
-            while ((((abs(motorBackLeft.getCurrentPosition() - previousLeftEncoder) < encoderTarget) &&
-                    (abs(motorBackRight.getCurrentPosition() - previousRightEncoder) < encoderTarget)) || abs(currentHeading) > 2) &&
+            while ((((abs(motorBackLeft.getCurrentPosition() - previousBackLeftEncoder) < encoderTarget) &&
+                    (abs(motorBackRight.getCurrentPosition() - previousBackRightEncoder) < encoderTarget)&&
+                    (abs(motorFrontLeft.getCurrentPosition() - previousFrontLeftEncoder) < encoderTarget) &&
+                    (abs(motorFrontRight.getCurrentPosition() - previousFrontRightEncoder) < encoderTarget)) || abs(currentHeading) > 2) &&
                     !IsRobotStalled(isLeftMotorStalled, isRightMotorStalled) && opMode.opModeIsActive() && !opMode.isStopRequested())
             {
                 Log.d("@@@@@@@@BackLeft : ", "" + motorBackLeft.getCurrentPosition());
                 Log.d("@@@@@@@@BackRight: ", "" + motorBackRight.getCurrentPosition());
-                Log.d("@@@@@@@@prvLeft : ", "" + previousLeftEncoder);
-                Log.d("@@@@@@@@prvRight: ", "" + previousRightEncoder);
+                Log.d("@@@@@@@@prvLeft : ", "" + previousBackLeftEncoder);
+                Log.d("@@@@@@@@prvRight: ", "" + previousBackRightEncoder);
                 Log.d("@@@@@@@@Target   : ", "" + encoderTarget);
 
                 // allow robot to drive on a heading other than zero
@@ -707,7 +724,7 @@ public class RSRobot
                 if (direction[step] == forward || direction[step] == backward)
                 {
 
-                    calculatedPow = calculateDrivePow(distance[step], abs(motorBackLeft.getCurrentPosition() - previousLeftEncoder) * onemotorclick, power[step]);
+                    calculatedPow = calculateDrivePow(distance[step], abs(motorBackLeft.getCurrentPosition() - previousBackLeftEncoder) * onemotorclick, power[step]);
 
                     //       Log.d("@@@Calc Pww ", "" + calculatedPow);
 
@@ -821,8 +838,10 @@ public class RSRobot
 
             opMode.sleep(100); // WAS 1000
 
-            previousLeftEncoder = motorBackLeft.getCurrentPosition();
-            previousRightEncoder = motorBackRight.getCurrentPosition();
+            previousBackLeftEncoder = motorBackLeft.getCurrentPosition();
+            previousBackRightEncoder = motorBackRight.getCurrentPosition();
+            previousFrontLeftEncoder = motorFrontLeft.getCurrentPosition();
+            previousFrontRightEncoder = motorFrontRight.getCurrentPosition();
             previousHeading -= initialHeading[step]; //cumulative error
             Log.d("@@@previousHeading ", "" + previousHeading);
 
@@ -1248,12 +1267,12 @@ public class RSRobot
                     lastLocation = robotLocationTransform;
                     foundAPicture = true;
                 }
-                //          else
-                //                Log.d("@@@@VUGSVL", trackable.getName() + " IS NOT GOOD");
+                          else
+                                Log.d("@@@@VUGSVL", trackable.getName() + " IS NOT GOOD");
                 break;
             }
-            //    else
-            //      Log.d("@@@@VUGSVL", trackable.getName() + " IS NOT VISIBLE");
+                else
+                  Log.d("@@@@VUGSVL", trackable.getName() + " IS NOT VISIBLE");
 
         }
         /**
@@ -1356,7 +1375,7 @@ public class RSRobot
 //            idle();
             opMode.sleep(50);
             counter++;
-        } while (robotPos.goodPos == false && counter <= 7);
+        } while (robotPos.goodPos == false && counter <= 12);
 
         if (robotPos.goodPos == false)
         {
@@ -1406,6 +1425,12 @@ public class RSRobot
             {
 
                 robotPos = GetStationaryVuforiaLocation();
+
+                Log.d("@@@@@Visible","" + robotPos.goodPos);
+                Log.d("@@@@@RobotX ","" + robotPos.robotX);
+                Log.d("@@@@@RobotY ", "" + robotPos.robotY);
+                Log.d("@@@@@Heading ", "" + robotPos.robotBearing);
+
 //            telemetry.addData("Visible", robotPos.goodPos);
 //            telemetry.addData("RobotX ", robotPos.robotX);
 //            telemetry.addData("RobotY ", robotPos.robotY);
@@ -1485,6 +1510,10 @@ public class RSRobot
             motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             while (redCounter < 3 && opMode.opModeIsActive() && !opMode.isStopRequested())
             {
                 DriveLeftNoRamp(power);
@@ -1554,7 +1583,10 @@ public class RSRobot
             motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+            motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             DriveRightNoRamp(power);
 
 
@@ -1636,7 +1668,10 @@ public class RSRobot
             motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+            motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             while (redCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < 2000)
             {
                 DriveRightNoRamp(power);
@@ -1679,7 +1714,6 @@ public class RSRobot
             }
 
 
-            motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
             //int beaconFrontEdge = motorBackRight.getCurrentPosition();
 

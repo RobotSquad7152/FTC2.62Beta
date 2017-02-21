@@ -30,6 +30,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
 import android.util.Log;
 
 @Autonomous(name = "RS: testauto", group = "Claire")
@@ -45,6 +47,7 @@ public class RSTestAuto extends RSLinearOpMode
     @Override
     public void runOpMode() throws InterruptedException
     {
+        RSRobot.RobotPos robotPos;
 
         InitHardware();
 
@@ -54,19 +57,49 @@ public class RSTestAuto extends RSLinearOpMode
         Log.d("@@@@@@@@@ ", "after Vuforia init");
 
         waitForStart();
-        robot.DriveBackward(.5,70);
-        robot.DriveForward(.5,20);
+
+        robot.DriveRight(.75, 60);
+
+        robotPos = robot.GetVuforiaLocation();
+
+
+
+
+    /*    robot.motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.motorFrontLeft.setPower(.5);
+        robot.motorFrontRight.setPower(.5);
+        robot.motorBackLeft.setPower(.5);
+        robot.motorBackRight.setPower(.5);
+
+        //robot.DriveBackward(.5,70);
+        //robot.DriveForward(.5,20);
 
         sleep(2000);
-
+        robot.motorFrontLeft.setPower(0);
+        robot.motorFrontRight.setPower(0);
+        robot.motorBackLeft.setPower(0);
+        robot.motorBackRight.setPower(0);
+        sleep(500);
+        Log.d("333flencodercount ", "" + robot.motorFrontLeft.getCurrentPosition());
+        Log.d("333frencodercount ", "" + robot.motorFrontRight.getCurrentPosition());
+        Log.d("333blencodercount ", "" + robot.motorBackLeft.getCurrentPosition());
+        Log.d("333brencodercount ", "" + robot.motorBackRight.getCurrentPosition());
+        */
         /*
         Log.d("@@@@@@@@@","ready to spin");
         robot.SpinRight(.7, 90);
         */
 
 
-
-/*        int stepnum = 1;
+/*
+        int stepnum = 2;
         double[] power = new double[stepnum];
         long[] distance = new long[stepnum];
         double[] direction = new double[stepnum];
@@ -75,32 +108,32 @@ public class RSTestAuto extends RSLinearOpMode
 
         //step 0
         power[0] = .45;
-        distance[0] = 100;
-        direction[0] = robot.right;
-        heading[0] = 0;*/
+        distance[0] = 50;
+        direction[0] = robot.forward;
+        heading[0] = 0;
 
 
 
-/*
+
         //step 1
         power[1] = .9;
         distance[1] = 70;
         direction[1] = robot.right;
         heading[1] = 0;
 
-        */
-/*
+
+
         //step 2
 
         power[2] = .9;
         distance[2] = 5;
         direction[2] = robot.backward;
         heading[2] = 45;
-        */
-
-        //robot.MultiDriveForwardToHeading(power, distance, direction, heading);
 
 
+        robot.MultiDriveForwardToHeading(power, distance, direction, heading);
+        robot.DriveBackward(.75, 50);
+*/
    /*     power[1] = .5;
         distance[1] = 150;
         direction[1] = robot.forward;

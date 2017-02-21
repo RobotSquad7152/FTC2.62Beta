@@ -15,7 +15,7 @@ public abstract class RSLinearOpMode extends LinearOpMode
 {
     public RSRobot robot;
 
-    public DcMotor motorFrontRight;
+    /*public DcMotor motorFrontRight;
     public DcMotor motorFrontLeft;
     public DcMotor motorBackRight;
     public DcMotor motorBackLeft;
@@ -37,7 +37,7 @@ public abstract class RSLinearOpMode extends LinearOpMode
     public DcMotorController motorControllerFrontDrive;
     public DcMotorController motorControllerRearDrive;
     public ModernRoboticsI2cGyro gyro;
-    public ColorSensor sensorRGB;
+    public ColorSensor sensorRGB;*/
 
     @Override
     public abstract void runOpMode() throws InterruptedException;
