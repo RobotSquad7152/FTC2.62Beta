@@ -53,14 +53,14 @@ public class RSTestAuto extends RSLinearOpMode
 
       //  robot.setMyAlliance(RSRobot.Alliance.BLUE);
         robot.stallDetectionOn = true;
-        robot.InitVuforia();
+        //robot.InitVuforia();
         Log.d("@@@@@@@@@ ", "after Vuforia init");
 
         waitForStart();
 
-        robot.DriveRight(.75, 60);
+        robot.DriveLeft(.7, 10);
 
-        robotPos = robot.GetVuforiaLocation();
+        //robotPos = robot.GetVuforiaLocation();
 
 
 

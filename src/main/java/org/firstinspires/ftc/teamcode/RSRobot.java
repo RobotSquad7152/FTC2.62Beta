@@ -377,24 +377,25 @@ public class RSRobot
         double rampUpCalcPow = 0;
         double minPow = .5;
         double rampUpMinPow = .5;
+        double rampDownMinPow = .2;
         double rampDownCalcPow = 0;
         //distance in cm for speeding up
         double rampUpDistance = 20;
         //distance in cm for slowing down
-        double rampDownDistance = 10;
+        double rampDownDistance = 40;
 
         rampUpCalcPow = rampUpMinPow + (((maxPow - rampUpMinPow) / rampUpDistance) * currentDistance);
-        rampDownCalcPow = minPow + (((minPow - maxPow) / rampDownDistance) * (currentDistance - totalDistance));
+        rampDownCalcPow = rampDownMinPow + (((rampDownMinPow - maxPow) / rampDownDistance) * (currentDistance - totalDistance));
 
         calculatedPow = Math.min(maxPow, rampUpCalcPow);
-        calculatedPow = Math.min(calculatedPow, rampDownCalcPow);
+        calculatedPow = Math.min(calculatedPow, rampDownCalcPow);  //logic needs to be examined because there's a different minpow on way down
 
 
         if (currentDistance > totalDistance / 2)
         {
-            if (calculatedPow < minPow)
+            if (calculatedPow < rampDownMinPow)
             {
-                calculatedPow = minPow;
+                calculatedPow = rampDownMinPow;
 
             }
         }
@@ -410,7 +411,12 @@ public class RSRobot
         {
             calculatedPow = maxPow;
         }
+
+        Log.d("@@@@@@", "currentDistance: " + currentDistance);
+        Log.d("@@@@@@", "calcPow: " + calculatedPow);
+
         return Range.clip(calculatedPow, -1, 1);
+
     }
 
 
@@ -439,6 +445,18 @@ public class RSRobot
         }
         return (rightCalcPow);
     }
+
+    int GetAbsHighestEncoder()
+    {
+        int frontLeftEncoder = Math.abs(motorFrontLeft.getCurrentPosition());
+        int frontRightEncoder = Math.abs(motorFrontRight.getCurrentPosition());
+        int backLeftEncoder = Math.abs(motorBackLeft.getCurrentPosition());
+        int backRightEncoder = Math.abs(motorBackRight.getCurrentPosition());
+
+        //find highest encoder value
+        return Math.max(Math.max(frontLeftEncoder, frontRightEncoder), Math.max(backLeftEncoder, backRightEncoder));
+    }
+
 
     private long Drive(double power, long distance, double direction, long initialheading) throws InterruptedException
     {
@@ -516,7 +534,7 @@ public class RSRobot
             if (direction == forward || direction == backward)
             {
 
-                calculatedPow = calculateDrivePow(distance, abs(motorBackLeft.getCurrentPosition()) * onemotorclick, power);
+                calculatedPow = calculateDrivePow(distance, GetAbsHighestEncoder() * onemotorclick, power);
 
                 //       Log.d("@@@Calc Pww ", "" + calculatedPow);
 
@@ -535,7 +553,12 @@ public class RSRobot
             else if (direction == left || direction == right)
             {
                 double powerDifferential = (kProportion * currentHeading);
-                calculatedPow = calculateSideDrivePow(distance, abs(motorBackLeft.getCurrentPosition()) * onemotorclick, power);
+
+                //determine which motor encoder is the highest
+
+
+
+                calculatedPow = calculateSideDrivePow(distance, GetAbsHighestEncoder() * onemotorclick / 1.15, power);
 
                 //       Log.d("@@@Calc Pww ", "" + calculatedPow);
 
@@ -1421,7 +1444,7 @@ public class RSRobot
         counter = 0;
         if (robotPos.goodPos)
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 6; i++)
             {
 
                 robotPos = GetStationaryVuforiaLocation();
@@ -1437,8 +1460,8 @@ public class RSRobot
 //            telemetry.addData("Heading ", robotPos.robotBearing);
 //            telemetry.update();
 //            idle();
-                opMode.sleep(30);
-                if (robotPos.goodPos == true)
+                opMode.sleep(50); //robot does not update vuforia every 30 ms on ZTEs
+                if (robotPos.goodPos == true && i > 1)//throw away first two vuforia readings because they are not consistent with final readings
                 {
                     counter++;
                     avgx += robotPos.robotX;
