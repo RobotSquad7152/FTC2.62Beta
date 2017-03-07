@@ -388,11 +388,11 @@ public class RSRobot
         rampDownCalcPow = rampDownMinPow + (((rampDownMinPow - maxPow) / rampDownDistance) * (currentDistance - totalDistance));
 
         calculatedPow = Math.min(maxPow, rampUpCalcPow);
-        calculatedPow = Math.min(calculatedPow, rampDownCalcPow);  //logic needs to be examined because there's a different minpow on way down
 
 
         if (currentDistance > totalDistance / 2)
         {
+            calculatedPow = Math.min(calculatedPow, rampDownCalcPow);  //logic needs to be examined because there's a different minpow on way down
             if (calculatedPow < rampDownMinPow)
             {
                 calculatedPow = rampDownMinPow;

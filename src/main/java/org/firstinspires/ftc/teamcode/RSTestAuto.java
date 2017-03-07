@@ -58,7 +58,7 @@ public class RSTestAuto extends RSLinearOpMode
 
         waitForStart();
 
-        robot.DriveLeft(.7, 10);
+        robot.DriveLeft(.7, 100);
 
         //robotPos = robot.GetVuforiaLocation();
 

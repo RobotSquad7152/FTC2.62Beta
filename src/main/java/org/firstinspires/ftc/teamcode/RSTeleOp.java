@@ -35,6 +35,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import java.util.Calendar;
+
 /**
  * This OpMode uses the common HardwareK9bot class to define the devices on the robot.
  * All device access is managed through the HardwareK9bot class. (See this class for device names)
@@ -103,7 +105,27 @@ public class RSTeleOp extends LinearOpMode
         double fineControlMultiplier = 1;
         double x2FineControlMultiplier = 1;
 
-
+        double leftPreviousEncoder = 0;
+        double leftNewEncoder = 0;
+        double rightPreviousEncoder = 0;
+        double rightNewEncoder = 0;
+        long leftNewTime = 0;
+        long leftPreviousTime = 0;
+        long rightNewTime = 0;
+        long rightPreviousTime = 0;
+        double leftDelta = 0;
+        double rightDelta = 0;
+        int encoderArraySize = 5;
+        EncoderData avgrightEncoder[] = new EncoderData[encoderArraySize];
+        EncoderData avgleftEncoder[] = new EncoderData[encoderArraySize];
+        int leftEncoderIndex =0;
+        int rightEncoderIndex=0;
+        boolean rightEncoderArrayFull=false;
+        boolean leftEncoderArrayFull = false;
+        long rightTime=0;
+        long leftTime=0;
+        double rightAROC=0;
+        double leftAROC=0;
         double servoSetterPos = robot.servoSetterDownPos;
 
         /* InitializeGyro the hardware variables.
@@ -111,7 +133,11 @@ public class RSTeleOp extends LinearOpMode
          */
         robot.init(hardwareMap);
 
-
+    for( int i=0;i<encoderArraySize;i++)
+    {
+        avgrightEncoder[i] = new EncoderData();
+        avgleftEncoder[i]= new EncoderData();
+    }
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
         telemetry.update();
@@ -342,7 +368,7 @@ public class RSTeleOp extends LinearOpMode
             telemetry.addData("servo setter", "%.2f", servoSetterPos);*/
             telemetry.addData("color sensor red", "%d", robot.color.red());
             telemetry.addData("color sensor blue", "%d", robot.color.blue());
-            telemetry.update();
+     //       telemetry.update();
 
             //continuous intake in
             if (gamepad1.a)
@@ -482,6 +508,55 @@ public class RSTeleOp extends LinearOpMode
                 clutchEngaged = false;
 
             }
+            leftNewTime = Calendar.getInstance().getTimeInMillis();
+            leftNewEncoder = robot.motorLaunchLeft.getCurrentPosition();
+            rightNewTime = Calendar.getInstance().getTimeInMillis();
+            rightNewEncoder = robot.motorLaunchRight.getCurrentPosition();
+
+
+            if(rightNewEncoder != rightPreviousEncoder )
+            {
+
+
+                avgrightEncoder[rightEncoderIndex].delta =  (rightNewEncoder - rightPreviousEncoder);
+                avgrightEncoder[rightEncoderIndex].millis = (rightNewTime - rightPreviousTime);
+
+                if(++rightEncoderIndex==encoderArraySize){
+                    rightEncoderIndex=0;
+                    rightEncoderArrayFull=true;
+                }
+                rightPreviousTime = rightNewTime;
+                if(rightEncoderArrayFull)
+                {
+                    rightTime = 0;
+                    rightDelta = 0;
+                    for (int i = 0; i < encoderArraySize; i++)
+                    {
+                        rightDelta += avgrightEncoder[i].delta;
+                        rightTime += avgrightEncoder[i].millis;
+                    }
+                    rightDelta = rightDelta/encoderArraySize;
+                    rightAROC = rightDelta/rightTime;
+                }
+            }
+
+
+            if(leftNewEncoder != leftPreviousEncoder )
+            {
+                leftDelta = (leftNewEncoder - leftPreviousEncoder)/(leftNewTime - leftPreviousTime);
+                leftPreviousTime = leftNewTime;
+            }
+
+            telemetry.addData("rightEnc ", rightNewEncoder);
+            telemetry.addData("leftEnc ", leftNewEncoder);
+
+            telemetry.addData("rightDelta ", rightDelta);
+            telemetry.addData("rightAROC ", rightAROC);
+            telemetry.addData("leftDelta ", leftDelta);
+            telemetry.update();
+
+            rightPreviousEncoder = rightNewEncoder;
+            leftPreviousEncoder = leftNewEncoder;
 
 
 
