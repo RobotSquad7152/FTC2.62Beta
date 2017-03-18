@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Build;
 import android.util.Log;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
@@ -73,8 +74,10 @@ public class RSRobot
     public Servo servoCapLeft = null;
     //public Servo servoColor = null;
     public ColorSensor color = null;
+    //public ColorSensor floorColor = null;
     //    public FtcI2cDeviceState colorSensorState;
     public ModernRoboticsI2cColorSensor colorSensor;
+    //public ModernRoboticsI2cColorSensor floorColorSensor;
     private ModernRoboticsI2cGyro gyro;
     // public GyroSensor gyro = null;
 
@@ -118,10 +121,10 @@ public class RSRobot
     public double servoClutchDisengagePos = 190.0 / 225.0;
     //^^ winch axel spins freely
 
-    public double servoCapRightInitPos = 245.0 / 255.0;
+    public double servoCapRightInitPos = 220.0 / 255.0;
     public double servoCapRightHoldPos = 190.0 / 255.0;
     public double servoCapRightParallel = 150.0 / 255.0;
-    public double servoCapLeftInitPos = 40.0 / 255.0;
+    public double servoCapLeftInitPos = 50.0 / 255.0;
     public double servoCapLeftHoldPos = 150.0 / 255.0;
     public double servoCapLeftParallel = 190.0 / 255.0;
 
@@ -210,6 +213,9 @@ public class RSRobot
         color = hwMap.colorSensor.get("color");
         color.enableLed(false);
         colorSensor = (ModernRoboticsI2cColorSensor) hwMap.get("color");
+       /* floorColor = hwMap.colorSensor.get("floor_color");
+        floorColor.enableLed(true);
+        floorColorSensor = (ModernRoboticsI2cColorSensor) hwMap.get("floor_color");*/
         //     colorSensorState = new FtcI2cDeviceState(colorSensor);
 
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
@@ -557,7 +563,6 @@ public class RSRobot
                 //determine which motor encoder is the highest
 
 
-
                 calculatedPow = calculateSideDrivePow(distance, GetAbsHighestEncoder() * onemotorclick / 1.15, power);
 
                 //       Log.d("@@@Calc Pww ", "" + calculatedPow);
@@ -726,9 +731,9 @@ public class RSRobot
 
             //continue driving while encoders have not reached target position, the current heading has not reached target heading, and while the robot is not stalled
             while ((((abs(motorBackLeft.getCurrentPosition() - previousBackLeftEncoder) < encoderTarget) &&
-                    (abs(motorBackRight.getCurrentPosition() - previousBackRightEncoder) < encoderTarget)&&
+                    (abs(motorBackRight.getCurrentPosition() - previousBackRightEncoder) < encoderTarget) &&
                     (abs(motorFrontLeft.getCurrentPosition() - previousFrontLeftEncoder) < encoderTarget) &&
-                    (abs(motorFrontRight.getCurrentPosition() - previousFrontRightEncoder) < encoderTarget)) || abs(currentHeading) > 2) &&
+                    (abs(motorFrontRight.getCurrentPosition() - previousFrontRightEncoder) < encoderTarget)) || abs(currentHeading) > 3) &&
                     !IsRobotStalled(isLeftMotorStalled, isRightMotorStalled) && opMode.opModeIsActive() && !opMode.isStopRequested())
             {
                 Log.d("@@@@@@@@BackLeft : ", "" + motorBackLeft.getCurrentPosition());
@@ -989,6 +994,197 @@ public class RSRobot
         motorFrontRight.setPower(0);
     }
 
+   /* private long DriveStallDetectionToTape(double power, long distance,  double direction) throws InterruptedException
+    {
+        double encoderTarget;
+        double calculatedPow = 0;
+        double currentHeading = 0;
+        double leftCalculatedPow = 0;
+        double rightCalculatedPow = 0;
+        int leftStallPos = 0;
+        int rightStallPos = 0;
+        int leftMotorPos = 0;
+        int rightMotorPos = 0;
+        int leftStallCutoff;
+        int rightStallCutoff;
+        int leftStallCount = 0;
+        int rightStallCount = 0;
+        int leftMagicNumberofDeath = 4; //(2560 * 0.01)/4;  //encoder ticks per 10msec
+        int rightMagicNumberofDeath = 4; //(2560 * 0.01)/4;  //encoder ticks per 10msec
+        double leftEncoderTarget;
+        double rightEncoderTarget;
+        double leftEncoderStart;
+        double rightEncoderStart;
+        boolean isLeftMotorStalled = false;
+        boolean isRightMotorStalled = false;
+        boolean tapeFound = false;
+
+        Log.d("XXXXXXXXXXXXX", "Drive to Tape");
+
+
+        //set current heading to zero
+        ResetCurrentHeading();
+        //use a while loop to keep motors going until desired heading reached
+
+       Log.d("XXXXXXXXXXXXX", "TRYING TO RESET ENCODERS");
+//        motorBackRight.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+//        motorBackLeft.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+//        while (motorBackRight.getCurrentPosition() != 0 || motorBackLeft.getCurrentPosition() != 0)
+//        {
+//            opMode.waitForNextHardwareCycle();
+//        }
+
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //      Log.d("@@@@@@@ResetBackRight: ", "xxx");
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //       Log.d("@@@@@@@@ResetBackLeft: ", "xxx");
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //      Log.d("@@@@@@@ResetBackRight: ", "xxx");
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //       Log.d("@@@@@@@@ResetBackLeft: ", "xxx");
+        //This failed on the 2nd run
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //    Log.d("@Rnwithoutencod right: ", "xxx");
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //    Log.d("@Rnwithoutencod right: ", "xxx");
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+
+        leftEncoderTarget = direction * distance / onemotorclick;
+        rightEncoderTarget = distance / onemotorclick;
+
+        leftEncoderStart = motorBackLeft.getCurrentPosition() * direction;
+        rightEncoderStart = motorBackRight.getCurrentPosition();
+        Log.d("XXXXXXXXXXXXX", "leftEncoderTarget = " + leftEncoderTarget);
+        Log.d("XXXXXXXXXXXXX", "leftEncoderStart = " + leftEncoderStart);
+        Log.d("XXXXXXXXXXXXX", "rightEncoderTarget = " + rightEncoderTarget);
+        Log.d("XXXXXXXXXXXXX", "rightEncoderStart = " + rightEncoderStart);
+
+        while (Math.abs(motorBackLeft.getCurrentPosition()) < Math.abs(leftEncoderStart + leftEncoderTarget) &&
+                Math.abs(motorBackRight.getCurrentPosition()) < Math.abs(rightEncoderStart + rightEncoderTarget) &&
+                !isLeftMotorStalled &&
+                !isRightMotorStalled &&
+                !tapeFound)
+
+        {
+
+            currentHeading = GetCurrentHeading();
+
+            calculatedPow = calculateDrivePow(distance, (motorBackLeft.getCurrentPosition() - leftEncoderStart) * onemotorclick, power);
+
+            leftCalculatedPow = Range.clip((calculatedPow * direction) - (currentHeading / 10), -1, 1);
+
+            rightCalculatedPow = Range.clip((calculatedPow * direction) + (currentHeading / 10), -1, 1);
+
+
+            motorBackLeft.setPower(leftCalculatedPow);
+            motorBackRight.setPower(rightCalculatedPow);
+            motorFrontLeft.setPower(leftCalculatedPow);
+            motorFrontRight.setPower(rightCalculatedPow);
+
+            opMode.telemetry.addData("Current Encoder Position ", motorBackRight.getCurrentPosition());
+            opMode.telemetry.addData("Current Heading ", currentHeading);
+            opMode.telemetry.addData("left power ", leftCalculatedPow);
+            opMode.telemetry.addData("right power ", rightCalculatedPow);
+
+            leftMotorPos = motorBackLeft.getCurrentPosition();
+            rightMotorPos = motorBackRight.getCurrentPosition();
+            leftStallCutoff = leftMagicNumberofDeath;
+            rightStallCutoff = rightMagicNumberofDeath;
+
+//			nxtDisplayBigTextLine( 5, "L %d", leftMotorPos );
+            //		nxtDisplayTextLine( 7, "R %d", rightMotorPos );
+
+            //if trying to move and not successfully moving
+            if ((leftCalculatedPow != 0) && (Math.abs(leftMotorPos - leftStallPos) <= leftStallCutoff))
+            {
+                //if stalling for 50 rounds through the loop (.5 second)
+                if (++leftStallCount == 20)
+                {
+                    //left motor has stalled.
+                    isLeftMotorStalled = true;
+
+                }
+            }
+            else
+            {
+                // not stalled, reset stall counter
+                leftStallCount = 0;
+
+                isLeftMotorStalled = false;
+            }
+            //remembers encoder Pos for the next time through the loop
+            leftStallPos = leftMotorPos;
+
+            //if trying to move and not successfully moving
+            if ((rightCalculatedPow != 0) && (Math.abs(rightMotorPos - rightStallPos) <= rightStallCutoff))
+            {
+                //if stalling for 50 rounds through the loop
+                if (++rightStallCount == 20)
+                {
+                    //right motor has stalled.
+                    isRightMotorStalled = true;
+
+
+                }
+            }
+            else
+            {
+                // not stalled, reset stall counter
+                rightStallCount = 0;
+
+                isRightMotorStalled = false;
+            }
+            //remembers encoder Pos for the next time through the loop
+            rightStallPos = rightMotorPos;
+
+            //Check color sensor for alliance color tape
+
+           if (isFloorWhite())
+            {
+                Log.d("XXXXXXXXXXXXXXXXXXXX", "TapeFound");
+                tapeFound = true;
+            }
+
+            Log.d("XXXXXXXXXXXXX", "leftMotorPos = " + motorBackLeft.getCurrentPosition());
+            Log.d("XXXXXXXXXXXXX", "rightMotorPos = " + motorBackRight.getCurrentPosition());
+        }
+
+        motorBackLeft.setPower(0);
+        motorFrontLeft.setPower(0);
+        motorBackRight.setPower(0);
+        motorFrontRight.setPower(0);
+
+        //  if (isLeftMotorStalled || isRightMotorStalled)
+        // {
+        if (leftMotorPos > rightMotorPos)
+
+            distance = (long) ((leftMotorPos - leftEncoderStart) * onemotorclick);
+        else
+            distance = (long) ((rightMotorPos - rightEncoderStart) * onemotorclick);
+        // }
+
+        Log.d("XXXXXXXXXXXXX", "leftMotorPos = " + motorBackLeft.getCurrentPosition());
+        Log.d("XXXXXXXXXXXXX", "rightMotorPos = " + motorBackRight.getCurrentPosition());
+
+        Log.d("XXXXXXXXXXXXXXXXXXXXX", "Drive to Tape Distance = " + distance);
+
+        return (distance);
+    }
+
+    public long DriveForwardStallDetectionToTape(double power, long distance) throws InterruptedException
+    {
+        //Calling drive function and 1 is forward
+        return (DriveStallDetectionToTape(power, distance, 1));
+    }
+
+    public long DriveBackwardStallDetectionToTape(double power, long distance) throws InterruptedException
+    {
+        //Calling drive function and -1 is backward
+        return (DriveStallDetectionToTape(power, distance, -1));
+    }*/
 //    public double GetDeltaHeading()
 //    {
 //        double currentHeading = gyro.getHeading();
@@ -1026,7 +1222,7 @@ public class RSRobot
         double calculatedPow = 0;
         double rampUpCalcPow = 0;
         double minSpinRampUpPow = .2;
-        double minSpinRampDownPow = 0.1; //changed from 0.1 on 1/10
+        double minSpinRampDownPow = 0.05; //changed from 0.1 on 1/10
         double rampDownCalcPow = 0;
         //number of degrees for speeding up
         double rampUpDegrees = 30;
@@ -1037,16 +1233,21 @@ public class RSRobot
         rampDownCalcPow = minSpinRampDownPow + (((minSpinRampDownPow - maxPow) / rampDownDegrees) * (abs(currentHeading) - totalTurn));
 
         calculatedPow = Math.min(maxPow, rampUpCalcPow);
-        calculatedPow = Math.min(calculatedPow, rampDownCalcPow);
+       // calculatedPow = Math.min(calculatedPow, rampDownCalcPow);
 
         //       Log.d("@@@@@@@ramp up calcPow:", "" + rampUpCalcPow);
-        //       Log.d("@@@@@ramp down calcPow:", "" + rampDownCalcPow);
+        //      Log.d("@@@@@ramp down calcPow:", "" + rampDownCalcPow);
 
-        if (calculatedPow < minSpinRampDownPow)
+        if (currentHeading > (totalTurn / 2))
         {
-            calculatedPow = minSpinRampDownPow;
+            calculatedPow = Math.min(calculatedPow, rampDownCalcPow);
+            if (calculatedPow < minSpinRampDownPow)
+            {
+                calculatedPow = minSpinRampDownPow;
 
+            }
         }
+
         return Range.clip(calculatedPow, -1, 1);
     }
 
@@ -1085,7 +1286,7 @@ public class RSRobot
 
 
             Log.d("@@@@@@@@@@@@@@@Heading:", "" + GetCurrentHeading());
-            //          Log.d("@@@@@@@@@@@@@@calcPow:", "" + calculatedPow);
+            Log.d("@@@@@@@@@@@@@@calcPow:", "" + calculatedPow);
             //    Log.d("@@@@@@@@@@@@@@@Delta:", "" + GetDeltaHeading());
 
             //          opMode.sleep(5);
@@ -1182,7 +1383,7 @@ public class RSRobot
 
         OpenGLMatrix toolsLocationOnField = OpenGLMatrix
 
-             //   .translation(-mmFTCFieldWidth/2, 30.0f*mmPerInch, TARGET_HEIGHT)
+                //   .translation(-mmFTCFieldWidth/2, 30.0f*mmPerInch, TARGET_HEIGHT)
                 .translation(30.0f * mmPerInch, mmFTCFieldWidth / 2, TARGET_HEIGHT)
 
                 .multiplied(Orientation.getRotationMatrix(
@@ -1195,11 +1396,9 @@ public class RSRobot
         //RobotLog.ii(TAG, "tools=%s", format(wheelsLocationOnField));
 
 
-
-
         OpenGLMatrix gearsLocationOnField = OpenGLMatrix
 
-            //    .translation( -mmFTCFieldWidth/2,-12.0f*mmPerInch, TARGET_HEIGHT)
+                //    .translation( -mmFTCFieldWidth/2,-12.0f*mmPerInch, TARGET_HEIGHT)
                 .translation(-12.0f * mmPerInch, mmFTCFieldWidth / 2, TARGET_HEIGHT)
 
                 .multiplied(Orientation.getRotationMatrix(
@@ -1290,12 +1489,12 @@ public class RSRobot
                     lastLocation = robotLocationTransform;
                     foundAPicture = true;
                 }
-                          else
-                                Log.d("@@@@VUGSVL", trackable.getName() + " IS NOT GOOD");
+                else
+                    Log.d("@@@@VUGSVL", trackable.getName() + " IS NOT GOOD");
                 break;
             }
-                else
-                  Log.d("@@@@VUGSVL", trackable.getName() + " IS NOT VISIBLE");
+            else
+                Log.d("@@@@VUGSVL", trackable.getName() + " IS NOT VISIBLE");
 
         }
         /**
@@ -1449,8 +1648,8 @@ public class RSRobot
 
                 robotPos = GetStationaryVuforiaLocation();
 
-                Log.d("@@@@@Visible","" + robotPos.goodPos);
-                Log.d("@@@@@RobotX ","" + robotPos.robotX);
+                Log.d("@@@@@Visible", "" + robotPos.goodPos);
+                Log.d("@@@@@RobotX ", "" + robotPos.robotX);
                 Log.d("@@@@@RobotY ", "" + robotPos.robotY);
                 Log.d("@@@@@Heading ", "" + robotPos.robotBearing);
 
@@ -1500,6 +1699,10 @@ public class RSRobot
 
     }
 
+    /* boolean isFloorWhite()
+     {
+         return floorColor.red()>128&&floorColor.blue()>128;
+     }*/
     public void LaunchBall(int ballnum, double power)
     {
         int ballsLaunched = 0;
@@ -1525,7 +1728,175 @@ public class RSRobot
 
     public void scanLeftPressBeacon(Double power, String Alliance) throws InterruptedException
     {
-        if (Alliance.equals("RED"))
+        beaconFound = false;
+
+        if (Alliance.equals("BLUE"))
+        {
+            int blueCounter = 0;
+            int redCounter = 0;
+            //double previousencodertarget = motorBackRight.getCurrentPosition();
+
+
+            long startTime = Calendar.getInstance().getTimeInMillis();
+            long currentTime = Calendar.getInstance().getTimeInMillis();
+
+
+            motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            DriveLeftNoRamp(power);
+
+
+            while (blueCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < 2000)
+            {
+
+                if (getColorSensorBlueValue() >= 4 && getColorSensorRedValue() < 1)
+                {
+                    blueCounter++;
+                    opMode.sleep(20);
+                }
+                else
+                    blueCounter = 0;
+
+                if (getColorSensorRedValue() > 3)
+                {
+                    redCounter++;
+                    opMode.sleep(20);
+                    if (redCounter > 4)
+                    {
+                        wrongColorFirst = true;
+                    }
+                }
+                //   Log.d("@@@@@@@@@Color Blue ", "" + getColorSensorBlueValue());
+                //     Log.d("@@@@@@@@@blueCounter ", "" + blueCounter);
+
+                currentTime = Calendar.getInstance().getTimeInMillis();
+            }
+            StopDrive();
+            opMode.sleep(100);
+
+            if (blueCounter == 5)
+            {
+                beaconFound = true;
+
+                //push the button
+                stallDetectionOn = true;
+                DriveBackward(.8, 20);
+                stallDetectionOn = false;
+                DriveForward(.7, 9);
+                opMode.sleep(50);
+            }
+            if (beaconFound == false)
+            {
+                DriveLeft(power, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
+            }
+
+
+            //int beaconFrontEdge = motorBackRight.getCurrentPosition();
+
+            motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+            opMode.sleep(100);
+
+            //int beaconBackEdge = motorBackRight.getCurrentPosition();
+            //DriveRight(.4,5);
+            //    servoColor.setPosition(servoColorPush);
+
+            //   servoColor.setPosition(servoColorIn);
+        }
+
+
+        else
+        {
+            int redCounter = 0;
+            int blueCounter = 0;
+
+            long startTime = Calendar.getInstance().getTimeInMillis();
+            long currentTime = Calendar.getInstance().getTimeInMillis();
+
+            motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            while (redCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < 2000)
+            {
+                DriveLeftNoRamp(power);
+                if (getColorSensorRedValue() >= 2 && getColorSensorBlueValue() < 1)
+                {
+                    redCounter++;
+                    opMode.sleep(20);
+                }
+                else
+                    redCounter = 0;
+                Log.d("@@@@@@@@@Color Red ", "" + getColorSensorRedValue());
+                Log.d("@@@@@@@@@redCounter ", "" + redCounter);
+
+                if (getColorSensorBlueValue() > 3)
+                {
+                    blueCounter++;
+                    opMode.sleep(20);
+                    if (blueCounter > 4)
+                    {
+                        wrongColorFirst = true;
+                    }
+                }
+
+                currentTime = Calendar.getInstance().getTimeInMillis();
+            }
+            StopDrive();
+            opMode.sleep(100);
+            if (redCounter == 5)
+            {
+                beaconFound = true;
+
+                //push button
+                stallDetectionOn = true;
+                DriveBackward(.7, 20);
+                stallDetectionOn = false;
+                DriveForward(.7, 9);
+            }
+
+            if (beaconFound == false)
+            {
+                DriveLeft(power, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
+            }
+
+
+            //int beaconFrontEdge = motorBackRight.getCurrentPosition();
+
+            motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+            opMode.sleep(100);
+
+            // int beaconBackEdge = motorBackRight.getCurrentPosition();
+            //DriveRight(.4,5);
+            //     servoColor.setPosition(servoColorPush);
+
+            //     servoColor.setPosition(servoColorIn);
+        /* if (Alliance.equals("RED"))
         {
             int redCounter = 0;
 
@@ -1581,7 +1952,7 @@ public class RSRobot
 
             DriveBackward(.5, 7);
 
-            DriveForward(.5, 7);
+            DriveForward(.5, 7);*/
         }
     }
 
@@ -1624,11 +1995,11 @@ public class RSRobot
                 else
                     blueCounter = 0;
 
-                if (getColorSensorRedValue() > 4)
+                if (getColorSensorRedValue() > 3)
                 {
                     redCounter++;
                     opMode.sleep(20);
-                    if (redCounter > 5)
+                    if (redCounter > 4)
                     {
                         wrongColorFirst = true;
                     }
@@ -1641,7 +2012,8 @@ public class RSRobot
             StopDrive();
             opMode.sleep(100);
 
-            if(blueCounter == 5){
+            if (blueCounter == 5)
+            {
                 beaconFound = true;
 
                 //push the button
@@ -1651,11 +2023,10 @@ public class RSRobot
                 DriveForward(.7, 9);
                 opMode.sleep(50);
             }
-            if(beaconFound == false){
+            if (beaconFound == false)
+            {
                 DriveRight(power, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
             }
-
-
 
 
             //int beaconFrontEdge = motorBackRight.getCurrentPosition();
@@ -1708,11 +2079,11 @@ public class RSRobot
                 Log.d("@@@@@@@@@Color Red ", "" + getColorSensorRedValue());
                 Log.d("@@@@@@@@@redCounter ", "" + redCounter);
 
-                if (getColorSensorBlueValue() > 4)
+                if (getColorSensorBlueValue() > 3)
                 {
                     blueCounter++;
                     opMode.sleep(20);
-                    if (blueCounter > 5)
+                    if (blueCounter > 4)
                     {
                         wrongColorFirst = true;
                     }
@@ -1722,7 +2093,8 @@ public class RSRobot
             }
             StopDrive();
             opMode.sleep(100);
-            if(redCounter == 5){
+            if (redCounter == 5)
+            {
                 beaconFound = true;
 
                 //push button
@@ -1732,10 +2104,10 @@ public class RSRobot
                 DriveForward(.7, 9);
             }
 
-            if(beaconFound == false){
+            if (beaconFound == false)
+            {
                 DriveRight(power, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
             }
-
 
 
             //int beaconFrontEdge = motorBackRight.getCurrentPosition();
@@ -1751,7 +2123,7 @@ public class RSRobot
 
             opMode.sleep(100);
 
-           // int beaconBackEdge = motorBackRight.getCurrentPosition();
+            // int beaconBackEdge = motorBackRight.getCurrentPosition();
             //DriveRight(.4,5);
             //     servoColor.setPosition(servoColorPush);
 
@@ -1759,7 +2131,10 @@ public class RSRobot
         }
     }
 
-
+    boolean isZTEphone()
+    {
+        return Build.MANUFACTURER == "zte";
+    }
 }
 
 

@@ -38,7 +38,16 @@ public abstract class RSLinearOpMode extends LinearOpMode
     public DcMotorController motorControllerRearDrive;
     public ModernRoboticsI2cGyro gyro;
     public ColorSensor sensorRGB;*/
-
+    public long zteTargetY=1660;
+    public long motoTargetY= 1750;
+    public long legosLeftTargetX=-800;
+    public long legosRightTargetX=-600;
+    public long gearsLeftTargetX =-350;
+    public long gearsRightTargetX;
+    public long wheelsLeftTargetX = 250;
+    public long wheelsRightTargetX = 490;
+    public long toolsLeftTargetX = 700;
+    public long toolsRightTargetX;
     @Override
     public abstract void runOpMode() throws InterruptedException;
 
