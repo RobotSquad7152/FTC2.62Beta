@@ -41,7 +41,7 @@ public class B_1_S2_CLOSE_BEACON extends RSLinearOpMode
 
         //step 0
         power[0] = .45;
-        distance[0] = 35;
+        distance[0] = 45;
         direction[0] = robot.backward;
         heading[0] = 90;
 
@@ -50,7 +50,7 @@ public class B_1_S2_CLOSE_BEACON extends RSLinearOpMode
 
         //step 1
         power[1] = .45;
-        distance[1] = 70;
+        distance[1] = 50;
         direction[1] = robot.right;
         heading[1] = 0;
 /*
@@ -93,9 +93,9 @@ public class B_1_S2_CLOSE_BEACON extends RSLinearOpMode
 
 
         if (robot.isZTEphone())
-            targetrobotypos = motoTargetY;
+            targetrobotypos = zteTargetY;
         else
-            targetrobotypos = motoTargetY;
+            targetrobotypos = motoTargetY+60;
         targetrobotxpos = wheelsRightTargetX;
         Log.d("@@@@@@@@@first scan", "");
         Log.d("@@@@@@@@@VU robotY ", "" +robotPos.robotY);
@@ -104,12 +104,13 @@ public class B_1_S2_CLOSE_BEACON extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.7, (long) (90-robotPos.robotBearing));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.7, (long) (robotPos.robotBearing-90));
         }
+
 
         if (robotPos.robotX < targetrobotxpos)
         {
@@ -167,8 +168,13 @@ public class B_1_S2_CLOSE_BEACON extends RSLinearOpMode
 
 
         robot.DriveBackwardToHeading(.2, distanceFromScan,(long)robotPos.robotBearing - 90);
-        robot.scanRightPressBeacon(.3, "BLUE");
+        robot.scanLeftPressBeacon(.3, "BLUE");
 
+        if (!robot.beaconFound)
+        {
+            //robot.DriveRight(.5, 20);
+            robot.scanLeftPressBeacon(.3, "BLUE");
+        }
 
 
 
@@ -231,11 +237,11 @@ public class B_1_S2_CLOSE_BEACON extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.7, (long) (90-robotPos.robotBearing));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.7, (long) (robotPos.robotBearing-90));
         }
 
 

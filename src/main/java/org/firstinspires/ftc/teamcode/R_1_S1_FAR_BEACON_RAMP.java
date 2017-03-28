@@ -92,11 +92,11 @@ public class R_1_S1_FAR_BEACON_RAMP extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.9, (long) (90-robotPos.robotBearing));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.9, (long) (robotPos.robotBearing-90));
         }
 
 

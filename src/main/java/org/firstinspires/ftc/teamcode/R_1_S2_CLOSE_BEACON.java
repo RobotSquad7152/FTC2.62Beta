@@ -106,20 +106,20 @@ public class R_1_S2_CLOSE_BEACON extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.9, (long) (90-robotPos.robotBearing));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.9, (long) (robotPos.robotBearing-90));
         }
 
         if (robotPos.robotX < targetrobotxpos)
         {
-            robot.DriveLeft(0.7,(long)((targetrobotxpos-robotPos.robotX)/10));
+            robot.DriveLeft(0.7,Math.abs((long)((targetrobotxpos-robotPos.robotX)/10)));
         }
         else if (robotPos.robotX > targetrobotxpos)
         {
-            robot.DriveRight(0.7,(long)((robotPos.robotX-targetrobotxpos)/10));
+            robot.DriveRight(0.7,Math.abs((long)((robotPos.robotX-targetrobotxpos)/10)));
 
         }
         Log.d("@@@@@@@@@after drv left", "");
@@ -240,20 +240,20 @@ public class R_1_S2_CLOSE_BEACON extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.9, (long) (90-robotPos.robotBearing));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.9, (long) (robotPos.robotBearing-90));
         }
 
         if (robotPos.robotX < targetrobotxpos)
         {
-            robot.DriveLeft(0.7,(long)((targetrobotxpos-robotPos.robotX)/10));
+            robot.DriveLeft(0.7,Math.abs((long)((targetrobotxpos-robotPos.robotX)/10)));
         }
         else if (robotPos.robotX > targetrobotxpos)
         {
-            robot.DriveRight(0.7,(long)((robotPos.robotX-targetrobotxpos)/10));
+            robot.DriveRight(0.7,Math.abs((long)((robotPos.robotX-targetrobotxpos)/10)));
 
         }
         Log.d("@@@@@@@@@after drv left", "");

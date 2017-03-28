@@ -9,6 +9,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -75,7 +76,7 @@ public class RSRobot
     //public Servo servoColor = null;
     public ColorSensor color = null;
     //public ColorSensor floorColor = null;
-    //    public FtcI2cDeviceState colorSensorState;
+        public FtcI2cDeviceState colorSensorState;
     public ModernRoboticsI2cColorSensor colorSensor;
     //public ModernRoboticsI2cColorSensor floorColorSensor;
     private ModernRoboticsI2cGyro gyro;
@@ -115,7 +116,7 @@ public class RSRobot
     public double servoSetterUpPos = 220.0 / 225.0;
     public double servoSetterRapidPos;
     public double servoSetterDownPos = 150.0 / 255.0;
-    public double servoClutchEngagedPos = 150.0 / 255.0;
+    public double servoClutchEngagedPos = 160.0 / 255.0;
     public double servoClutchLockedPos = 220.0 / 225.0;
     //^^ winch axel will not move at all
     public double servoClutchDisengagePos = 190.0 / 225.0;
@@ -123,12 +124,12 @@ public class RSRobot
 
     public double servoCapRightInitPos = 220.0 / 255.0;
     public double servoCapRightHoldPos = 190.0 / 255.0;
-    public double servoCapRightParallel = 150.0 / 255.0;
+    public double servoCapRightParallel = 120.0 / 255.0;
     public double servoCapLeftInitPos = 50.0 / 255.0;
     public double servoCapLeftHoldPos = 150.0 / 255.0;
-    public double servoCapLeftParallel = 190.0 / 255.0;
+    public double servoCapLeftParallel = 220.0 / 255.0;
 
-    double autoLaunchPow = .45;
+    double autoLaunchPow = .6;
 
 
 
@@ -216,11 +217,13 @@ public class RSRobot
        /* floorColor = hwMap.colorSensor.get("floor_color");
         floorColor.enableLed(true);
         floorColorSensor = (ModernRoboticsI2cColorSensor) hwMap.get("floor_color");*/
-        //     colorSensorState = new FtcI2cDeviceState(colorSensor);
+            colorSensorState = new FtcI2cDeviceState(colorSensor);
 
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
         motorLaunchLeft.setDirection(DcMotor.Direction.REVERSE);
+        motorIntake.setDirection(DcMotor.Direction.REVERSE);
+        motorIntake2.setDirection(DcMotor.Direction.REVERSE);
 
 
         // Set all motors to zero power
@@ -428,7 +431,7 @@ public class RSRobot
 
     double LeftPowerCalc(double calculatedPow, double direction, double currentHeading)
     {
-        double powerFactor = 30;
+        double powerFactor = 25; //was 30 (3/27/17) smaller means faster turn correction
         double steerRatio = powerFactor / calculatedPow;
 
         double leftCalcPow = Range.clip((calculatedPow * direction) - (currentHeading / steerRatio), -1, 1);
@@ -441,7 +444,7 @@ public class RSRobot
 
     double RightPowerCalc(double calculatedPow, double direction, double currentHeading)
     {
-        double powerFactor = 30;
+        double powerFactor = 25; //was 30 (3/27/17) smaller means faster turn correction
         double steerRatio = powerFactor / calculatedPow;
 
         double rightCalcPow = Range.clip((calculatedPow * direction) + (currentHeading / steerRatio), -1, 1);
@@ -483,7 +486,7 @@ public class RSRobot
         boolean isLeftMotorStalled = false;
         boolean isRightMotorStalled = false;
 
-        //      colorSensorState.setEnabled(false);
+              colorSensorState.setEnabled(false);
 
         //set current heading to zero
         ResetCurrentHeading();
@@ -657,7 +660,7 @@ public class RSRobot
                 distance = (long) abs(rightMotorPos * onemotorclick);
         }
         Log.d("@@@Distance ", "" + distance);
-        //    colorSensorState.setEnabled(true);
+           colorSensorState.setEnabled(true);
         return (distance);
     }
 
@@ -686,7 +689,7 @@ public class RSRobot
         boolean isLeftMotorStalled = false;
         boolean isRightMotorStalled = false;
 
-        //       colorSensorState.setEnabled(false);
+              colorSensorState.setEnabled(false);
 
 
         //     Log.d("@@ResetCurrentHeading: ", "xxx");
@@ -889,7 +892,7 @@ public class RSRobot
                 returnDistance = (long) abs(rightMotorPos * onemotorclick);
         }
         Log.d("@@@Distance ", "" + distance);
-        //   colorSensorState.setEnabled(true);
+           colorSensorState.setEnabled(true);
         return (returnDistance);
     }
 
@@ -1256,7 +1259,7 @@ public class RSRobot
 
         Log.d("@@@@@@@@@@@@@@@Spin:", "" + degrees * direction);
 
-        //   colorSensorState.setEnabled(false);
+           colorSensorState.setEnabled(false);
         ResetCurrentHeading();
         Log.d("@@@@@@@@@@@@@@@Spin:", "" + degrees * direction);
         // ChangeTargetHeading(degrees * direction);
@@ -1305,7 +1308,7 @@ public class RSRobot
         Log.d("@@@@@@@@@Final Heading:", "" + GetCurrentHeading());
         //    Log.d("@@@@@@@@@Final Delta:", "" + GetDeltaHeading());
 
-        //    colorSensorState.setEnabled(true);
+            colorSensorState.setEnabled(true);
         return (long) abs(GetCurrentHeading());
     }
 
@@ -1725,8 +1728,10 @@ public class RSRobot
         motorLaunchLeft.setPower(0);
         motorLaunchRight.setPower(0);
     }
-
-    public void scanLeftPressBeacon(Double power, String Alliance) throws InterruptedException
+    public void scanLeftPressBeacon(Double power, String Alliance) throws InterruptedException{
+        scanLeftPressBeacon(power,Alliance,2000);
+    }
+    public void scanLeftPressBeacon(Double power, String Alliance,long failTime) throws InterruptedException
     {
         beaconFound = false;
 
@@ -1752,10 +1757,10 @@ public class RSRobot
             DriveLeftNoRamp(power);
 
 
-            while (blueCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < 2000)
+            while (blueCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < failTime)
             {
 
-                if (getColorSensorBlueValue() >= 4 && getColorSensorRedValue() < 1)
+                if (getColorSensorBlueValue() >= 3 && getColorSensorRedValue() < 1)
                 {
                     blueCounter++;
                     opMode.sleep(20);
@@ -1793,7 +1798,7 @@ public class RSRobot
             }
             if (beaconFound == false)
             {
-                DriveLeft(power, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
+                DriveLeft(.7, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
             }
 
 
@@ -1834,7 +1839,7 @@ public class RSRobot
             motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            while (redCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < 2000)
+            while (redCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < failTime)
             {
                 DriveLeftNoRamp(power);
                 if (getColorSensorRedValue() >= 2 && getColorSensorBlueValue() < 1)
@@ -1847,7 +1852,7 @@ public class RSRobot
                 Log.d("@@@@@@@@@Color Red ", "" + getColorSensorRedValue());
                 Log.d("@@@@@@@@@redCounter ", "" + redCounter);
 
-                if (getColorSensorBlueValue() > 3)
+                if (getColorSensorBlueValue() >= 3)
                 {
                     blueCounter++;
                     opMode.sleep(20);
@@ -1865,6 +1870,11 @@ public class RSRobot
             {
                 beaconFound = true;
 
+                //Drive back a little bit on longer scans
+                if(failTime > 2000)
+                {
+                    DriveLeft(.7,5);
+                }
                 //push button
                 stallDetectionOn = true;
                 DriveBackward(.7, 20);
@@ -1874,7 +1884,7 @@ public class RSRobot
 
             if (beaconFound == false)
             {
-                DriveLeft(power, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
+                DriveLeft(.7, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
             }
 
 
@@ -1955,9 +1965,11 @@ public class RSRobot
             DriveForward(.5, 7);*/
         }
     }
+    public void scanRightPressBeacon(double power, String Alliance) throws InterruptedException{
+        scanRightPressBeacon(power,Alliance,2000);
+    }
 
-
-    public void scanRightPressBeacon(double power, String Alliance) throws InterruptedException
+    public void scanRightPressBeacon(double power, String Alliance,long failTime) throws InterruptedException
     {
 
         beaconFound = false;
@@ -1984,10 +1996,10 @@ public class RSRobot
             DriveRightNoRamp(power);
 
 
-            while (blueCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < 2000)
+            while (blueCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < failTime)
             {
 
-                if (getColorSensorBlueValue() >= 4 && getColorSensorRedValue() < 1)
+                if (getColorSensorBlueValue() >= 3 && getColorSensorRedValue() < 1)
                 {
                     blueCounter++;
                     opMode.sleep(20);
@@ -2025,7 +2037,7 @@ public class RSRobot
             }
             if (beaconFound == false)
             {
-                DriveRight(power, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
+                DriveRight(.7, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
             }
 
 
@@ -2066,7 +2078,7 @@ public class RSRobot
             motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            while (redCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < 2000)
+            while (redCounter < 5 && opMode.opModeIsActive() && !opMode.isStopRequested() && currentTime - startTime < failTime)
             {
                 DriveRightNoRamp(power);
                 if (getColorSensorRedValue() >= 2 && getColorSensorBlueValue() < 1)
@@ -2079,9 +2091,14 @@ public class RSRobot
                 Log.d("@@@@@@@@@Color Red ", "" + getColorSensorRedValue());
                 Log.d("@@@@@@@@@redCounter ", "" + redCounter);
 
-                if (getColorSensorBlueValue() > 3)
+                Log.d("@@@@@@@@@Color Blue ", "" + getColorSensorBlueValue());
+                Log.d("@@@@@@@@@blueCounter ", "" + blueCounter);
+
+
+                if (getColorSensorBlueValue() >= 3)
                 {
                     blueCounter++;
+
                     opMode.sleep(20);
                     if (blueCounter > 4)
                     {
@@ -2106,7 +2123,7 @@ public class RSRobot
 
             if (beaconFound == false)
             {
-                DriveRight(power, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
+                DriveRight(.7, (long) abs(motorBackLeft.getCurrentPosition() * onemotorclick));
             }
 
 

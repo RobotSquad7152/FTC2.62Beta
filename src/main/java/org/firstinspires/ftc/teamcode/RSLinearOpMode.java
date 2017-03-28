@@ -39,15 +39,15 @@ public abstract class RSLinearOpMode extends LinearOpMode
     public ModernRoboticsI2cGyro gyro;
     public ColorSensor sensorRGB;*/
     public long zteTargetY=1660;
-    public long motoTargetY= 1750;
+    public long motoTargetY= 1760;
     public long legosLeftTargetX=-800;
     public long legosRightTargetX=-600;
     public long gearsLeftTargetX =-350;
-    public long gearsRightTargetX;
+    public long gearsRightTargetX = -70;
     public long wheelsLeftTargetX = 250;
-    public long wheelsRightTargetX = 490;
-    public long toolsLeftTargetX = 700;
-    public long toolsRightTargetX;
+    public long wheelsRightTargetX = 590;
+    public long toolsLeftTargetX = 690;
+    public long toolsRightTargetX = 990;
     @Override
     public abstract void runOpMode() throws InterruptedException;
 

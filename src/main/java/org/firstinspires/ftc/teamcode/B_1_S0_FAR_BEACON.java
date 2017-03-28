@@ -79,11 +79,11 @@ public class B_1_S0_FAR_BEACON extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.9, (long) (90-robotPos.robotBearing));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.9, (long) (robotPos.robotBearing-90));
         }
 
 
@@ -198,11 +198,11 @@ public class B_1_S0_FAR_BEACON extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.9, (long) (90-robotPos.robotBearing));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.9, (long) (robotPos.robotBearing-90));
         }
 
 

@@ -198,11 +198,11 @@ public class B_1_FB_NB_R extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.9, Math.abs((long) (robotPos.robotBearing - 90)));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.9, Math.abs((long) (90 - robotPos.robotBearing)));
         }
 
 

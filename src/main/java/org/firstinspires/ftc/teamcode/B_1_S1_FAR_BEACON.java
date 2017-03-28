@@ -83,17 +83,17 @@ public class B_1_S1_FAR_BEACON extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.9, (long) (90-robotPos.robotBearing));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.9, (long) (robotPos.robotBearing-90));
         }
 
 
         if (robotPos.robotX < targetrobotxpos)
         {
-            robot.DriveLeft(0.7, (long) ((targetrobotxpos - robotPos.robotX) / 10));
+            robot.DriveLeft(0.7, Math.abs((long) ((targetrobotxpos - robotPos.robotX) / 10)));
             /*
             while (robotPos.robotX < targetrobotxpos)
             {
@@ -113,7 +113,7 @@ public class B_1_S1_FAR_BEACON extends RSLinearOpMode
         }
         else if (robotPos.robotX > targetrobotxpos)
         {
-            robot.DriveRight(0.7, (long) ((robotPos.robotX - targetrobotxpos) / 10));
+            robot.DriveRight(0.7, Math.abs((long) ((robotPos.robotX - targetrobotxpos) / 10)));
         }
         Log.d("@@@@@@@@@after drv left", "");
 
@@ -187,7 +187,7 @@ public class B_1_S1_FAR_BEACON extends RSLinearOpMode
             targetrobotypos = zteTargetY;
         else
             targetrobotypos = motoTargetY;
-        targetrobotxpos = 250;
+        targetrobotxpos = wheelsLeftTargetX;
         Log.d("@@@@@@@@@first scan", "");
         Log.d("@@@@@@@@@VU robotY ", "" + robotPos.robotY);
         Log.d("@@@@@@@@@VU robotX ", "" + robotPos.robotX);
@@ -195,11 +195,11 @@ public class B_1_S1_FAR_BEACON extends RSLinearOpMode
 
         if (robotPos.robotBearing < 90)
         {
-            robot.SpinLeft(.9, (long) (Math.abs(robotPos.robotBearing) - 90));
+            robot.SpinLeft(.9, (long) (90-robotPos.robotBearing));
         }
         else if (robotPos.robotBearing > 90)
         {
-            robot.SpinRight(.9, (long) (90 - (Math.abs(robotPos.robotBearing))));
+            robot.SpinRight(.9, (long) (robotPos.robotBearing-90));
         }
 
 
